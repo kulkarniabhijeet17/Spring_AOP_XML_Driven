@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd ">
+
+	<context:component-scan base-package="com.abhijeet.common.controller" />
+	<context:component-scan base-package="com.abhijeet.common.service" />
+
+	<!-- <bean id="login" class="com.abhijeet.common.controller.LoginController" /> -->
+
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/jsp/" p:suffix=".jsp"></bean>
+
+	<aop:config>
+		<aop:aspect ref="loggingAspect">
+			<aop:pointcut expression="execution(* com.abhijeet.common.controller.LoginController.*(..))" id="loggingPointcuts" />
+			<aop:pointcut expression="execution(* com.abhijeet.common.service.LoginService.login(String, String)) and args(userId, password)" id="passingParametersPointcuts" />
+			<!-- before advice -->
+			<aop:before method="logBeforeAllMethods" pointcut-ref="loggingPointcuts" />
+			<!-- after advice -->
+			<aop:after method="logAfterAllMethods" pointcut-ref="loggingPointcuts" />
+			<!-- after returning advice -->
+			<aop:after-returning method="logAfterReturningAllMethods" pointcut-ref="loggingPointcuts" />
+			<!-- after throwing advice -->
+			<aop:after-throwing method="logAfterThrowingAllMethods" pointcut-ref="loggingPointcuts" />
+			<!-- around advice -->
+			<aop:around method="logAroundAllMethods" pointcut-ref="loggingPointcuts" />
+			<!-- passing parameters to advice -->
+			<aop:before method="logAllMethods" pointcut-ref="passingParametersPointcuts" arg-names="userId, password" />
+
+			<aop:declare-parents types-matching="com.abhijeet.common.service.*+" implement-interface="com.abhijeet.common.service.ChangePasswordService" default-impl="com.abhijeet.common.service.impl.ChangePasswordServiceImpl" />
+			<!-- <aop:declare-parents types-matching="com.abhijeet.common.service.*+" implement-interface="com.abhijeet.common.service.ChangePasswordService" delegate-ref="changePasswordServiceDelegate" /> -->
+		</aop:aspect>
+	</aop:config>
+
+	<!-- <bean id="changePasswordServiceDelegate" class="com.abhijeet.common.service.impl.ChangePasswordServiceImpl" /> -->
+
+	<!-- Logging Aspect -->
+	<bean id="loggingAspect" class="com.abhijeet.springaop.LoggingAspect" />
+</beans>
